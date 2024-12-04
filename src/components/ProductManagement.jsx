@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ProductService } from '../services/ProductService';
+import { jwtDecode } from 'jwt-decode'
 
 const ProductManagement = ({jwtToken}) => {
   const [products, setProducts] = useState([]);
@@ -7,6 +8,8 @@ const ProductManagement = ({jwtToken}) => {
   const [newProduct, setNewProduct] = useState({ name: "", price: "", stock: "" });
   const [isEditingProduct, setIsEditingProduct] = useState(false);
   const [editProduct, setEditProduct] = useState(null); // This holds the product to be edited
+  const decodedToken = jwtDecode(jwtToken);
+  const isAdmin = decodedToken.role === "Admin";
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -63,12 +66,16 @@ const ProductManagement = ({jwtToken}) => {
 
   return (
     <div>
-      <button
-        onClick={() => setIsAddingProduct(true)}
-        className="bg-blue-500 text-white px-4 py-2 rounded mb-4"
-      >
+      {isAdmin &&
+      (
+        <button
+          onClick={() => setIsAddingProduct(true)}
+          className="bg-blue-500 text-white px-4 py-2 rounded mb-4"
+        >
         Add Product
-      </button>
+        </button>
+      )
+      }
       <div></div>
 
       {/* Add Product Form */}
@@ -178,7 +185,10 @@ const ProductManagement = ({jwtToken}) => {
               <td className="border px-4 py-2">{product.price}</td>
               <td className="border px-4 py-2">{product.stock}</td>
               <td className="border px-4 py-2 flex justify-end w-48">
-                <button
+                {isAdmin &&
+                (
+                  <div>
+                    <button
                   onClick={() => handleEditProduct(product)}
                   className="bg-yellow-500 text-white px-2 py-1 rounded mr-2"
                 >
@@ -190,6 +200,9 @@ const ProductManagement = ({jwtToken}) => {
                 >
                   Delete
                 </button>
+                  </div>
+                )
+                }
               </td>
             </tr>
           ))}
